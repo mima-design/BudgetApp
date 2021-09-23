@@ -12,7 +12,7 @@ class Entry(models.Model):
 
     type = models.IntegerField(choices=CHOICES)
     quantity = models.DecimalField("Quantity", decimal_places=2, max_digits=16)
-    budget = models.ForeignKey("Budget", on_delete=models.CASCADE)
+    budget = models.ForeignKey("Budget", on_delete=models.CASCADE, related_name="budget_entry")
 
 
 class Category(models.Model):

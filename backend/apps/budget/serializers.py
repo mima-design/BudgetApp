@@ -17,13 +17,13 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class BudgetSerializer(serializers.ModelSerializer):
-    entry = EntrySerializer(many=True)
+    budget_entry = EntrySerializer(many=True)
     category = Category()
 
     class Meta:
         model = Budget
         fields = "__all__"
         extra_kwargs = {
-            "entry": {"required": False},
+            "budget_entry": {"required": False},
             "category": {"required": False}
         }
