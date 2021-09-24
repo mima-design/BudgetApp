@@ -2,7 +2,8 @@ import pytest
 import json
 from django.test import Client
 from apps.budget.tests.fixture.category_fixtures import create_single_category
-from apps.budget.tests.fixture.budget_fixtures import create_single_budget_not_shared, create_single_budget_shared
+from apps.budget.tests.fixture.budget_fixtures import \
+    create_single_budget_not_shared, create_single_budget_shared, create_plenty_budget_not_shared
 from shared.tests.fixture.user_fixtures import \
     create_regular_user, create_regular_user_2, create_apiclient_with_token, create_apiclient_2_with_token
 
@@ -43,6 +44,15 @@ def test_get_bugdet_endpoint(client, expected_content, expected_status, budget_f
     resp = client.get("/budget/1/")
     assert resp.status_code == expected_status
     assert resp.content == expected_content
+
+
+@pytest.mark.django_db
+def test_get_all_bugdets(apiclient_with_token, plenty_budget_not_shared):
+    resp = apiclient_with_token.get("/budget/?page=2")
+    resp_json = resp.json()
+    assert resp.status_code == 200
+    assert resp_json["count"] == 30
+    assert len(resp_json["results"]) == 5
 
 
 @pytest.mark.parametrize(
