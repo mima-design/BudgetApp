@@ -9,7 +9,7 @@ function emptySuccessCallback() {}
 
 const axiosRequests = {
   get: (url, success = emptySuccessCallback, fail = axiosFail) => {
-    axios({
+    return axios({
       method: 'GET',
       url: url,
     })
@@ -17,7 +17,7 @@ const axiosRequests = {
     .catch(fail);
   },
   post: (url, data, success = emptySuccessCallback, fail = axiosFail) => {
-    axios({
+    return axios({
       method: 'POST',
       url: url,
       data
@@ -26,7 +26,7 @@ const axiosRequests = {
     .catch(fail);
   },
   put: (url, data, success = emptySuccessCallback, fail = axiosFail) => {
-    axios({
+    return axios({
       method: 'PUT',
       url: url,
       data
@@ -34,11 +34,10 @@ const axiosRequests = {
     .then(success)
     .catch(fail);
   },
-  delete: (url, data, success = emptySuccessCallback, fail = axiosFail) => {
-    axios({
+  delete: (url, success = emptySuccessCallback, fail = axiosFail) => {
+    return axios({
       method: 'DELETE',
-      url: url,
-      data
+      url: url
     })
     .then(success)
     .catch(fail);

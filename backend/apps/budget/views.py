@@ -5,6 +5,7 @@ from rest_framework.authentication import TokenAuthentication
 from apps.budget.models import Budget, Entry, Category
 from apps.budget.serializers import BudgetSerializer, EntrySerializer, CategorySerializer
 from apps.budget.permissions import BudgetIsOwnerOrShared
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class EntryViewSet(viewsets.ModelViewSet):
@@ -38,4 +39,5 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = (f.name for f in Category._meta.get_fields())
     authentication_classes = (TokenAuthentication,)

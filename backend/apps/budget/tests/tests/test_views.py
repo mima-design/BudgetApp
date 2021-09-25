@@ -19,8 +19,8 @@ def test_get_category(single_category, apiclient_with_token):
     resp = apiclient_with_token.get("/category/")
     response_json = resp.json()
     assert resp.status_code == 200
-    assert len(response_json) == 1
-    assert response_json[0]["id"] == single_category.id
+    assert len(response_json["results"]) == 1
+    assert response_json["results"][0]["id"] == single_category.id
 
 
 @pytest.mark.parametrize(
