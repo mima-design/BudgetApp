@@ -42,8 +42,21 @@ const axiosRequests = {
     .then(success)
     .catch(fail);
   },
+  checkForToken: () => {
+    const token = localStorage.getItem("token");
+    
+    if (token)
+      axios.defaults.headers.common['Authorization'] = token;  
+    
+
+    return !!token
+  },
   setAuthToken: (token) => {
     axios.defaults.headers.common['Authorization'] = token;
+    localStorage.setItem("token", token);
+  },
+  removeAuthToken: () => {
+    localStorage.clear()
   }
 };
 

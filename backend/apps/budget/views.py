@@ -5,7 +5,6 @@ from rest_framework.authentication import TokenAuthentication
 from apps.budget.models import Budget, Entry, Category
 from apps.budget.serializers import BudgetSerializer, EntrySerializer, CategorySerializer
 from apps.budget.permissions import BudgetIsOwnerOrShared
-from django_filters.rest_framework import DjangoFilterBackend
 
 
 class EntryViewSet(viewsets.ModelViewSet):
