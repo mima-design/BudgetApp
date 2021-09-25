@@ -1,17 +1,27 @@
-import { Grid, TextField, Button } from "@material-ui/core";
+import { Grid, Button } from "@material-ui/core";
 import Box from '@mui/material/Box';
 import { connect } from "react-redux";
 import React from "react";
-import AddIcon from '@mui/icons-material/Add';
 import { ENTRY_TYPE, postEntry, deleteEntry } from "../../redux/actions/entries";
 import ShareDialog from "./shareDialog";
+import EntryList from "./entryList";
 
 class BudgetBox extends React.Component {
 
   state = {
     incomeValue: "",
     expenseValue: "",
-    showShareDialog: false
+    showShareDialog: false,
+    expanseCategory: null,
+    incomeCategory: null,
+  }
+
+  onExpanseCategoryChange = (e) => {
+    this.setState({expanseCategory: e.target.value});
+  }
+
+  onIncomeCategoryChange = (e) => {
+    this.setState({incomeCategory: e.target.value});
   }
 
   onExpenseChange = (e) => {
@@ -23,22 +33,32 @@ class BudgetBox extends React.Component {
   }
 
   retrieveAndSortEntries(type) {
-    const output = this.props.budget.budget_entry.filter((item) => item.type === type);
-    return output;
+    let output = Object.fromEntries(this.props.categories.map((category) => [category.id, {name: category.name, values: []}]));
+    let count = 0;
+    output["None"] = {name: "No category", values: []};
+
+    for (const entry of this.props.budget.budget_entry) {
+      let tmp_category;
+      if (entry.type !== type)
+        continue
+      
+      count += parseFloat(entry.quantity);
+
+      if (entry.category === null) {
+        tmp_category = output["None"];
+      } else {
+        tmp_category = output[entry.category];
+      }
+
+      tmp_category.values.push(entry);
+
+    }
+
+    return [Object.values(output), count];
   }
 
-  addIncomeEntry = () => {
-    this.addEntry(this.state.incomeValue, ENTRY_TYPE.income);
-    this.setState({incomeValue: 0});
-  }
-
-  addExpanseEntry = () => {
-    this.addEntry(this.state.expenseValue, ENTRY_TYPE.expenses);
-    this.setState({expenseValue: 0});
-  }
-
-  addEntry(quantity, type, category) {
-    this.props.postEntry({quantity, type, budget: this.props.budget.id});
+  addEntry = (quantity, type, category) => {
+    this.props.postEntry({quantity, type, budget: this.props.budget.id, category});
   }
 
   onShowShareDialog = () => {
@@ -54,10 +74,9 @@ class BudgetBox extends React.Component {
   }
 
   render() {
-    const expenses = this.retrieveAndSortEntries(ENTRY_TYPE.expenses);
-    const income = this.retrieveAndSortEntries(ENTRY_TYPE.income);
-    const budgetSum = income.reduce((sum, item) => sum + parseFloat(item.quantity), 0) 
-      - expenses.reduce((sum, item) => sum + parseFloat(item.quantity), 0);
+    const [expensesList, expensesValue] = this.retrieveAndSortEntries(ENTRY_TYPE.expenses);
+    const [incomeList, incomeValue] = this.retrieveAndSortEntries(ENTRY_TYPE.income);
+    const budgetSum = incomeValue - expensesValue;
 
     return (
       <Box style={{border: "1px solid grey", padding: 5, margin: 5}}>
@@ -84,47 +103,21 @@ class BudgetBox extends React.Component {
                 </Button>
               }
           </Grid>
-          <Grid container style={{marginTop: 10}}>
-            <Grid item xs={6}>
-              <b>Income</b>
-              {income.map((item) => {
-                return (<div key={`entry_${item.id}`}>
-                  {item.quantity}
-                </div>)
-              })}
-            <div>
-              <TextField 
-                value={this.state.incomeValue}
-                onChange={this.onIncomeChange}
-                type="number"
-              />
-              <Button
-                onClick={this.addIncomeEntry}
-              >
-                <AddIcon />
-              </Button>
-            </div>
-            </Grid>
-            <Grid item xs={6}>
-            <b>Expanses</b>
-              {expenses.map((item) => {
-                return (<div key={`entry_${item.id}`}>
-                  {item.quantity}
-                </div>)
-              })}
-              <div>
-                <TextField 
-                  value={this.state.expenseValue}
-                  onChange={this.onExpenseChange}
-                  type="number"
-                />
-                <Button
-                  onClick={this.addExpanseEntry}
-                >
-                  <AddIcon />
-                </Button>
-              </div>
-            </Grid>
+          <Grid container style={{marginTop: 10}}> 
+            <EntryList
+              categories={this.props.categories}
+              entryList={incomeList}
+              label={"Expanses"}
+              onAddHandler={this.addEntry}
+              type={ENTRY_TYPE.income}
+            />
+            <EntryList
+              categories={this.props.categories}
+              entryList={expensesList}
+              label={"Expanses"}
+              onAddHandler={this.addEntry}
+              type={ENTRY_TYPE.expenses}
+            />
           </Grid>
           <Grid item xs={12}>
             <b>Total:</b> {budgetSum.toFixed(2)}
