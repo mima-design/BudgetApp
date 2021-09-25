@@ -1,5 +1,5 @@
 import { Button, Grid } from "@material-ui/core";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Pagination } from "@mui/material";
 import React from "react"
 import { connect } from "react-redux";
 import { getBudgetsData, deleteBudget, postBudget } from "../redux/actions/budgets";
@@ -15,7 +15,8 @@ class BudgetList extends React.Component {
     isLoading: true,
     showCategoryDialog: false,
     page: 1,
-    pageSize: 25,
+    pageSize: 3,
+    pageCount: 0
   }
 
   componentDidMount() {
@@ -29,32 +30,45 @@ class BudgetList extends React.Component {
     this.setState({isLoading: true});
     this.props.getBudgetsData(
       `?page=${page}&page_size=${this.state.pageSize}`, 
-      () => this.setState({isLoading: false})
+      (data) => this.setState((prevState) => ({isLoading: false, pageCount: Math.ceil(data.count/prevState.pageSize), page}))
     );
   }
 
+  onPageChange = (e, page) => {
+    this.getPageData(page);
+  }
+
   addNewBudget = () => {
-    this.props.postBudget({});
+    this.props.postBudget({}, this.onAddNewBudget);
+  }
+
+  onAddNewBudget = () => {
+    if (this.props.budgets.length > this.state.pageSize)
+      this.getPageData(this.state.page);
+    
   }
 
   render() {
     return (this.state.isLoading ? 
-          <CircularProgress/> 
-        : <Grid container>
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                onClick={this.addNewBudget}
-              >
-                <AddIcon /> Add Budget
-              </Button>
-            </Grid>
-            <Grid container>
-              {this.props.budgets.map((item) => (
-                <Grid key={item.id} item xs={4}><BudgetBox budget={item} /></Grid>
-              ))}
-            </Grid>
-          </Grid>
+      <CircularProgress/> 
+    : <Grid container>
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            onClick={this.addNewBudget}
+          >
+            <AddIcon /> Add Budget
+          </Button>
+        </Grid>
+        <Grid container>
+          {this.props.budgets.map((item) => (
+            <Grid key={item.id} item xs={4}><BudgetBox budget={item} /></Grid>
+          ))}
+        </Grid>
+        <Grid item xs={12}>
+          <Pagination count={this.state.pageCount} page={this.state.page} onChange={this.onPageChange}></Pagination>
+        </Grid>
+      </Grid>
     );
   }
 

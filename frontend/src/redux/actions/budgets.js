@@ -4,7 +4,8 @@ export const GET_BUDGETS = "GET_BUDGETS";
 export const ADD_BUDGET = "ADD_BUDGET";
 export const REMOVE_BUDGET = "REMOVE_BUDGET";
 export const UPDATE_BUDGET = "UPDATE_CATEGORY";
-export const SHARE_BUDGET = "SHARE_BUDGET";
+export const PAGE_SIZE = 3;
+
 
 export const getBudgets = (data) => ({
   type: GET_BUDGETS,
@@ -38,13 +39,14 @@ export function getBudgetsData( query = "", callback = () => null) {
   }
 }
 
-export function postBudget(data) {
+export function postBudget(data, callback = () => null) {
   return function(dispatch) {
     return axiosRequests.post(
       "/budget/",
       data,
       ({data}) => {
         dispatch(addBugdet(data));
+        callback(data);
       }
     );
   }

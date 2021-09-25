@@ -1,5 +1,5 @@
 import { ADD_CATEGORY, REMOVE_CATEGORY, GET_CATEGORIES, UPDATE_CATEGORY } from "./actions/categories";
-import { ADD_BUDGET, REMOVE_BUDGET, GET_BUDGETS, SHARE_BUDGET, UPDATE_BUDGET } from "./actions/budgets";
+import { ADD_BUDGET, REMOVE_BUDGET, GET_BUDGETS, UPDATE_BUDGET, PAGE_SIZE } from "./actions/budgets";
 import { combineReducers } from 'redux';
 import { ADD_ENTRY, REMOVE_ENTRY } from "./actions/entries";
 import { GET_CURRENT_USER, GET_USERS } from "./actions/users";
@@ -66,7 +66,10 @@ function budgets(state = [], action) {
   let idx;
   
   switch (action.type) {
-    case ADD_BUDGET: 
+    case ADD_BUDGET:
+      if (state.length > PAGE_SIZE)
+        return state;
+        
       new_state = [...state]; //making shallow copy
       new_state.push(action.data);
       return new_state;
