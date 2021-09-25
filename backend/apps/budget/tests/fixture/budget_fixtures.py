@@ -5,15 +5,15 @@ from apps.budget.tests.fixture.category_fixtures import create_single_category
 
 
 @pytest.fixture(name="single_budget_not_shared")
-def create_single_budget_not_shared(regular_user, single_category):
-    return BudgetFactory.create(owner=regular_user, category=single_category)
+def create_single_budget_not_shared(regular_user):
+    return BudgetFactory.create(owner=regular_user)
 
 
 @pytest.fixture(name="single_budget_shared")
-def create_single_budget_shared(regular_user, regular_user_2, single_category):
-    return BudgetFactory.create(owner=regular_user, category=single_category, shared_with=[regular_user_2])
+def create_single_budget_shared(regular_user, regular_user_2):
+    return BudgetFactory.create(owner=regular_user, shared_with=[regular_user_2])
 
 
 @pytest.fixture(name="plenty_budget_not_shared")
 def create_plenty_budget_not_shared(regular_user, single_category):
-    return [BudgetFactory.create(owner=regular_user, category=single_category) for x in range(30)]
+    return [BudgetFactory.create(owner=regular_user) for x in range(30)]

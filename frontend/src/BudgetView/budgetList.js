@@ -1,42 +1,75 @@
+import { Button, Grid } from "@material-ui/core";
 import { CircularProgress } from "@mui/material";
 import React from "react"
-import axiosRequests from "../axiosShortcuts";
+import { connect } from "react-redux";
+import { getBudgetsData, deleteBudget, postBudget } from "../redux/actions/budgets";
+import { getUsers } from "../redux/actions/users";
+import { getCategoriesData } from "../redux/actions/categories";
+import AddIcon from '@mui/icons-material/Add';
+import BudgetBox from "./components/budgetBox";
 
 
-
-export default class BudgetList extends React.Component {
+class BudgetList extends React.Component {
 
   state = {
     isLoading: true,
     showCategoryDialog: false,
+    page: 1,
+    pageSize: 25,
   }
 
   componentDidMount() {
-    this.getUserBudgets();
+    this.getPageData(this.state.page);
+    //todo: add one loading state for all requests, mayby promise all or sth
+    this.props.getCategoriesData();
+    this.props.getUsers();
   }
 
-  getUserBudgets(id) {
-    axiosRequests.get("/budget/", this.onBudgetSuccess);
+  getPageData(page) {
+    this.setState({isLoading: true});
+    this.props.getBudgetsData(
+      `?page=${page}&page_size=${this.state.pageSize}`, 
+      () => this.setState({isLoading: false})
+    );
   }
 
-  onBudgetSuccess = (respData) => {
-    this.setState({
-      isLoading: false,
-      budgets: respData.data
-    });
+  addNewBudget = () => {
+    this.props.postBudget({});
   }
 
   render() {
-    return (
-      <div>
-        { this.state.isLoading ? 
+    return (this.state.isLoading ? 
           <CircularProgress/> 
-        : <div>
-            
-        </div> }
-        
-      </div>
+        : <Grid container>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                onClick={this.addNewBudget}
+              >
+                <AddIcon /> Add Budget
+              </Button>
+            </Grid>
+            <Grid container>
+              {this.props.budgets.map((item) => (
+                <Grid key={item.id} item xs={4}><BudgetBox budget={item} /></Grid>
+              ))}
+            </Grid>
+          </Grid>
     );
   }
 
 }
+
+const mapStateToProps = (state, ownProps) => ({
+  budgets: state.budgets
+});
+
+const mapDispatchToProps = {
+  getBudgetsData,
+  deleteBudget,
+  postBudget,
+  getCategoriesData,
+  getUsers
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(BudgetList);

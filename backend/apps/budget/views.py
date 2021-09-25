@@ -22,7 +22,7 @@ class BudgetViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         request = self.request
-        if self.detail: #this will make problems with pagination
+        if self.detail:
             pk = self.kwargs["pk"]
             return Budget.objects.filter(pk=pk)
 

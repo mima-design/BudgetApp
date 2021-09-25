@@ -7,11 +7,21 @@ import Grid from '@mui/material/Grid';
 import BudgetList from "./budgetList";
 import CategoryDialog from "./components/categoryDialog";
 import axiosRequests from "../axiosShortcuts";
+import { CircularProgress } from "@mui/material";
+import { connect } from "react-redux";
+import { getCurrentUser } from "../redux/actions/users";
 
-export default class Dashboard extends React.Component {
+
+class Dashboard extends React.Component {
 
   state = {
+    isLoading: false,
     showCategoryDialog: false,
+  }
+
+  componentDidMount() {
+    this.setState({isLoading: true});
+    this.props.getCurrentUser(() => this.setState({isLoading: false}));
   }
 
   logout = () => {
@@ -31,11 +41,20 @@ export default class Dashboard extends React.Component {
 
   render() {
     return (
-      <Box sx={{ flexGrow: 1 }}>
+      this.state.isLoading ? 
+        <CircularProgress/> 
+      : <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
-          <Toolbar>
-            <Button color="inherit" onClick={this.logout}>Logout</Button>
-          </Toolbar>
+          <Grid container>
+            <Grid item xs={11}>
+              <Toolbar>
+                <Button color="inherit" onClick={this.logout}>Logout</Button>
+              </Toolbar>
+            </Grid>
+            <Grid item xs={1} alignContent={"center"}>
+              <div style={{color: "#ffffff"}}><b>{this.props.user.username}</b></div>
+            </Grid>
+          </Grid>
         </AppBar>
         <Grid container style={{marginTop: "10px"}}>
           <Grid item xs={12}>
@@ -46,8 +65,8 @@ export default class Dashboard extends React.Component {
               Categories
             </Button>
           </Grid>
-          <BudgetList />
         </Grid>
+        <BudgetList />
         { this.state.showCategoryDialog && <CategoryDialog 
           open={this.state.showCategoryDialog}
           onClose={this.onCloseCategoryDialog}
@@ -56,3 +75,13 @@ export default class Dashboard extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state, ownProps) => ({
+  user: state.info
+});
+
+const mapDispatchToProps = {
+  getCurrentUser
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

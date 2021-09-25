@@ -1,5 +1,6 @@
 import pytest
 import json
+from apps.budget.models import Budget
 from django.test import Client
 from apps.budget.tests.fixture.category_fixtures import create_single_category
 from apps.budget.tests.fixture.budget_fixtures import \
@@ -27,7 +28,7 @@ def test_get_category(single_category, apiclient_with_token):
     "client,expected_content,expected_status,budget_fixture",
     [
         (pytest.lazy_fixture("apiclient_with_token"),
-         b'{"id":1,"budget_entry":[],"owner":1,"category":1,"shared_with":[]}',
+         b'{"id":1,"budget_entry":[],"shared_with":[],"owner":1}',
          200,
          pytest.lazy_fixture("single_budget_not_shared")),
         (pytest.lazy_fixture("apiclient_2_with_token"),
@@ -35,7 +36,7 @@ def test_get_category(single_category, apiclient_with_token):
          403,
          pytest.lazy_fixture("single_budget_not_shared")),
         (pytest.lazy_fixture("apiclient_2_with_token"),
-         b'{"id":1,"budget_entry":[],"owner":2,"category":1,"shared_with":[1]}',
+         b'{"id":1,"budget_entry":[],"shared_with":[1],"owner":2}',
          200, pytest.lazy_fixture("single_budget_shared")),
     ]
 )
@@ -64,6 +65,28 @@ def test_get_all_bugdets(apiclient_with_token, plenty_budget_not_shared):
     ]
 )
 @pytest.mark.django_db
-def test_delete_bugdet_endpoint(client, expected_status, budget_fixture):
+def test_delete_budget_endpoint(client, expected_status, budget_fixture):
     resp = client.delete("/budget/1/")
     assert resp.status_code == expected_status
+
+
+@pytest.mark.django_db
+def test_post_budget_endpoint(apiclient_with_token):
+    resp = apiclient_with_token.post("/budget/", {}, content_type="application/json")
+    assert resp.status_code == 201
+    resp_json = resp.json()
+
+    budget = Budget.objects.get(id=resp_json["id"])
+    assert budget.owner_id == resp_json["owner"]
+
+
+@pytest.mark.django_db
+def test_put_budget_share_with_user(apiclient_with_token, single_budget_not_shared, regular_user_2):
+    resp = apiclient_with_token.put(f"/budget/{single_budget_not_shared.id}/",
+                                    json.dumps({"shared_with": [regular_user_2.id]}),
+                                    content_type="application/json")
+    resp_json = resp.json()
+    assert resp.status_code == 200
+    budget = Budget.objects.get(id=single_budget_not_shared.id)
+    assert list(budget.shared_with.all().values_list("id", flat=True)) == [regular_user_2.id]
+

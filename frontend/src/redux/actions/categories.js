@@ -52,7 +52,7 @@ export function postCategory(data) {
 export function deleteCategory(id) {
   return function(dispatch) {
     return axiosRequests.delete(
-      `/category/${id}`,
+      `/category/${id}/`,
       (respData) => {
         dispatch(removeCategory(id));
       }
@@ -63,7 +63,7 @@ export function deleteCategory(id) {
 export function putCategory(id, data) {
   return function(dispatch) {
     return axiosRequests.put(
-      `/category/${id}`,
+      `/category/${id}/`,
       data,
       (respData) => {
         dispatch(updateCategory(respData.data));
