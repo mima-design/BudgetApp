@@ -45,7 +45,10 @@ class BudgetList extends React.Component {
   onAddNewBudget = () => {
     if (this.props.budgets.length > this.state.pageSize)
       this.getPageData(this.state.page);
-    
+  }
+
+  deleteBudget = (id) => {
+    this.props.deleteBudget(id, () => this.getPageData(this.state.page));
   }
 
   render() {
@@ -62,7 +65,7 @@ class BudgetList extends React.Component {
         </Grid>
         <Grid container>
           {this.props.budgets.map((item) => (
-            <Grid key={item.id} item xs={4}><BudgetBox budget={item} /></Grid>
+            <Grid key={item.id} item xs={4}><BudgetBox budget={item} deleteBudget={this.deleteBudget} /></Grid>
           ))}
         </Grid>
         <Grid item xs={12}>

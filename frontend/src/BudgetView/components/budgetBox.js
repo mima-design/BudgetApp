@@ -49,6 +49,10 @@ class BudgetBox extends React.Component {
     this.setState({showShareDialog: false});
   }
 
+  deleteBudget = () => {
+    this.props.deleteBudget(this.props.budget.id);
+  }
+
   render() {
     const expenses = this.retrieveAndSortEntries(ENTRY_TYPE.expenses);
     const income = this.retrieveAndSortEntries(ENTRY_TYPE.income);
@@ -60,6 +64,16 @@ class BudgetBox extends React.Component {
         <Grid container>
           <Grid item xs={12} style={{borderBottom: "1px solid black"}}>
               <b>Budget no.</b>{this.props.budget.id}
+              
+              { this.props.budget.owner === this.props.currentUser.id &&
+                <Button 
+                  variant="contained"
+                  onClick={this.deleteBudget}
+                  style={{float: "right"}}
+                >
+                  Delete
+                </Button>
+              }
               { this.props.budget.owner === this.props.currentUser.id &&
                 <Button 
                   variant="contained"

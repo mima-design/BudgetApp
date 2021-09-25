@@ -52,12 +52,13 @@ export function postBudget(data, callback = () => null) {
   }
 }
 
-export function deleteBudget(id) {
+export function deleteBudget(id, callback = () => null) {
   return function(dispatch) {
     return axiosRequests.delete(
       `/budget/${id}/`,
-      ({data}) => {
+      () => {
         dispatch(removeBudget(id));
+        callback();
       }
     )
   }
