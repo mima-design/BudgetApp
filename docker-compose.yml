@@ -1,0 +1,17 @@
+version: "3.7"
+   
+services:
+  front:
+    build: /frontend
+    command: npm start
+    volumes:
+      - .:/frontend
+    ports:
+      - "3000:3000"
+  web:
+    build: /backend
+    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
