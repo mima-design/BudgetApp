@@ -16,8 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from apps.budget.urls import urlpatterns as budget_urls
+from apps.general.urls import urlpatterns as general_urls
+from rest_framework.authtoken import views
+
+
+class MyAuth(views.ObtainAuthToken):
+    authentication_classes = []
+
 
 urlpatterns = [
+    path('auth/', MyAuth.as_view()),
     path('admin/', admin.site.urls),
-    path('', include(budget_urls))
+    path('', include(budget_urls)),
+    path('', include(general_urls))
 ]

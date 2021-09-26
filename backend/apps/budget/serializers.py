@@ -1,8 +1,10 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from apps.budget.models import Entry, Budget, Category
 
 
 class EntrySerializer(serializers.ModelSerializer):
+    category = Category()
 
     class Meta:
         model = Entry
@@ -17,13 +19,17 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class BudgetSerializer(serializers.ModelSerializer):
-    entry = EntrySerializer(many=True)
-    category = Category()
+    budget_entry = EntrySerializer(many=True, required=False)
+    shared_with = serializers.PrimaryKeyRelatedField(many=True,
+                                                     queryset=User.objects.all(),
+                                                     required=False)
 
     class Meta:
         model = Budget
         fields = "__all__"
         extra_kwargs = {
-            "entry": {"required": False},
-            "category": {"required": False}
+            "owner": {"read_only": True},
         }
+
+    def create(self, validated_data):
+        return Budget.objects.create(owner=self.context["request"].user)
